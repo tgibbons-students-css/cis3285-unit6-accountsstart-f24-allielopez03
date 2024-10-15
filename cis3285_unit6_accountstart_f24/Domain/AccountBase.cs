@@ -40,8 +40,17 @@ namespace Domain
 
         public void AddTransaction(decimal amount)
         {
-            RewardPoints += CalculateRewardPoints(amount);
+            //adding rewards if the amount is greater than 0
+            if (amount > 0)
+            {
+                RewardPoints += CalculateRewardPoints(amount);
+            }
             Balance += amount;
+        }
+
+        public void SubtractTransaction(decimal amount)
+        {
+            Balance -= amount;
         }
 
         public abstract int CalculateRewardPoints(decimal amount);

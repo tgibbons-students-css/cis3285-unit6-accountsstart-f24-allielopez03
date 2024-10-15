@@ -16,4 +16,9 @@ namespace Domain
         private const int GoldTransactionCostPerPoint = 5;
         private const int GoldBalanceCostPerPoint = 2000;
     }
+
+
+
+
+
 }
