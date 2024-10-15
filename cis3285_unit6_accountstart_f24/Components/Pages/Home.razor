@@ -37,10 +37,25 @@
 <button class="btn btn-primary" @onclick="btnDeposit_Click">Deposit</button>
 <br>
 
+@if (!string.IsNullOrEmpty(depositErrorMessage))
+{
+    <p style="color: red;">@depositErrorMessage</p>
+}
+<br>
+
+
 <label for="withdrawAmount">Withdraw Amount:</label>
 <input type="text" id="withdrawAmount" name="withdrawAmount" @bind="strWithdrawAmount">
 <button class="btn btn-primary" @onclick="btnWithdraw_Click">Withdraw</button>
 <br>
+
+@if (!string.IsNullOrEmpty(withdrawErrorMessage))
+{
+    <p style="color: red;">@withdrawErrorMessage</p>
+}
+<br>
+
+
 
 @code {
 
@@ -50,6 +65,9 @@
     private decimal accountBalance = 0.00m;     // numeric value of account balance
     private string strDepositAmount;            // amount to deposit as a string
     private string strWithdrawAmount;           // amount to withdraw as a string
+    private string depositErrorMessage;  // Error message for deposit validation
+    private string withdrawErrorMessage;  // Error message for withdrawal validation
+
 
     private List<string> accountList = new List<string>();
     AccountService acctService = new AccountService();
@@ -73,22 +91,75 @@
         }
     }
 
-    private void btnDeposit_Click()
-    {
-        decimal amount = decimal.Parse(strDepositAmount);
-        acctService.Deposit(selectedAccountName, amount);
-        accountBalance = acctService.GetAccountBalance(selectedAccountName);
-        strAccountBalance = accountBalance.ToString();
-        StateHasChanged();
-    }
+	private void btnDeposit_Click()
+	{
+		/*decimal amount = decimal.Parse(strDepositAmount);
+		acctService.Deposit(selectedAccountName, amount);
+		accountBalance = acctService.GetAccountBalance(selectedAccountName);
+		strAccountBalance = accountBalance.ToString();
+		StateHasChanged(); */
+
+		depositErrorMessage = string.Empty; // Clear any previous error messages
+
+		// Validate if deposit amount is a valid decimal and greater than zero
+		if (decimal.TryParse(strDepositAmount, out decimal amount))
+		{
+			if (amount > 0)
+			{
+				acctService.Deposit(selectedAccountName, amount);
+				accountBalance = acctService.GetAccountBalance(selectedAccountName);
+				strAccountBalance = accountBalance.ToString();
+				StateHasChanged();
+			}
+			else
+			{
+				depositErrorMessage = "Deposit amount must be greater than zero.";
+			}
+		}
+		else
+		{
+			depositErrorMessage = "Please enter a valid decimal amount for the deposit.";
+		}
+	}
+
 
     private void btnWithdraw_Click()
     {
-        decimal amount = decimal.Parse(strWithdrawAmount);
+        /*decimal amount = decimal.Parse(strWithdrawAmount);
         acctService.Withdrawal(selectedAccountName, amount);
         accountBalance = acctService.GetAccountBalance(selectedAccountName);
         strAccountBalance = accountBalance.ToString();
-        StateHasChanged();
+        StateHasChanged();*/
+
+        withdrawErrorMessage = string.Empty; // Clear any previous error messages
+
+        // Validate if withdrawal amount is a valid decimal
+        if (decimal.TryParse(strWithdrawAmount, out decimal amount))
+        {
+            if (amount > 0)
+            {
+                // Check if the amount to withdraw exceeds the account balance
+                if (amount <= accountBalance)
+                {
+                    acctService.Withdrawal(selectedAccountName, amount);
+                    accountBalance = acctService.GetAccountBalance(selectedAccountName);
+                    strAccountBalance = accountBalance.ToString();
+                    StateHasChanged();
+                }
+                else
+                {
+                    withdrawErrorMessage = "Insufficient funds for the withdrawal.";
+                }
+            }
+            else
+            {
+                withdrawErrorMessage = "Withdrawal amount must be greater than zero.";
+            }
+        }
+        else
+        {
+            withdrawErrorMessage = "Please enter a valid decimal amount for the withdrawal.";
+        }
     }
 
     private void btnAddAccount_Click()
